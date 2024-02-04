@@ -32,3 +32,13 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+.idea/aws.xml
+.idea/Azure_TF_GWLB.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.terraform.lock.hcl
+ice-cube-private-key.pem
+tfplan
