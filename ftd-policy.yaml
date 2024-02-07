@@ -1,0 +1,133 @@
+- hosts: fmc
+  connection: httpapi
+  gather_facts: False
+  tasks:
+    # Fetch Data from FMC
+    - name: Get Domain UUID
+      cisco.fmcansible.fmc_configuration:
+        operation: getAllDomain
+        register_as: domain
+    - name: Get Devices
+      cisco.fmcansible.fmc_configuration:
+        operation: getAllDevice
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        filters:
+          name: ftd-azure
+        register_as: device_list
+      until: device_list is defined
+      retries: 60
+      delay: 5
+      when: device_list is not defined
+    - name: Get Port Object HTTP
+      cisco.fmcansible.fmc_configuration:
+        operation: getAllProtocolPortObject
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        filters:
+          name: HTTP
+        register_as: http
+    - name: Get Port Object HTTPS
+      cisco.fmcansible.fmc_configuration:
+        operation: getAllProtocolPortObject
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        filters:
+          name: HTTPS
+        register_as: https
+    - name: Get IPS Policy
+      cisco.fmcansible.fmc_configuration:
+        operation: getAllIntrusionPolicy
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        filters:
+          name: Security Over Connectivity
+        register_as: ips_policy
+    - name: Get Access Policy
+      cisco.fmcansible.fmc_configuration:
+        operation: getAllAccessPolicy
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        filters:
+          name: ftd-azure-Access-Policy
+        register_as: accesspolicy
+
+    # Host Objects
+    - name: Web Server
+      cisco.fmcansible.fmc_configuration:
+        operation: upsertHostObject
+        data:
+          name: web_server
+          value: '{{ web_server }}'
+          type: Host
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        register_as: web_server
+    - name: Web Load Balancer
+      cisco.fmcansible.fmc_configuration:
+        operation: upsertHostObject
+        data:
+          name: web_lb_public_ip
+          value: '{{ web_lb_public_ip }}'
+          type: Host
+        path_params:
+          domainUUID: '{{ domain[0].uuid }}'
+        register_as: web_lb_public_ip
+
+
+    # Access Control Policy
+
+    - name: Access Rule 1
+      cisco.fmcansible.fmc_configuration:
+        operation: upsertAccessRule
+        data:
+          name: Permit Outbound
+          type: accessrule
+          action: ALLOW
+          section: mandatory
+          enabled: true
+          sendEventsToFMC: true
+          logBegin: true
+          logEnd: true
+          sourceNetworks:
+            objects:
+              - id: '{{ web_lb_public_ip.id }}'
+                name: '{{ web_lb_public.ip.name }}'
+                type: '{{ web_lb_public_ip.type }}'
+          newComments:
+            - 'Outbound Traffic'
+        path_params:
+          section: 'Mandatory'
+          containerUUID: '{{ accesspolicy[0].id }}'
+          domainUUID: '{{ domain[0].uuid }}'
+        register_as: accessrule1
+    - name: Access Rule 2
+      cisco.fmcansible.fmc_configuration:
+        operation: upsertAccessRule
+        data:
+          name: Inbound to Web Server
+          type: accessrule
+          action: ALLOW
+          section: mandatory
+          enabled: true
+          sendEventsToFMC: true
+          logBegin: true
+          logEnd: true
+          destinationNetworks:
+            objects:
+              - id: '{{ web_lb_public_ip.id }}'
+                name: '{{ web_lb_public.ip.name }}'
+                type: '{{ web_lb_public_ip.type }}'
+          destinationPorts:
+            objects:
+              - id: '{{ HTTP.id }}'
+                name: '{{ HTTP.name }}'
+                type: '{{ HTTP.type }}'
+          newComments:
+            - 'Web Server'
+        path_params:
+          section: 'Mandatory'
+          containerUUID: '{{ accesspolicy[0].id }}'
+          domainUUID: '{{ domain[0].uuid }}'
+        register_as: accessrule2
+

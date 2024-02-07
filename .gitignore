@@ -42,3 +42,4 @@ terraform.rc
 .terraform.lock.hcl
 ice-cube-private-key.pem
 tfplan
+hosts.yaml
