@@ -19,6 +19,7 @@ provider "azurerm" {
   #resource_provider_registrations = "none"
   subscription_id = "61b020af-0c48-4132-b2cf-2b162c4c42a2"
   features {}
+  skip_provider_registration = true # Prevents registering varying resource providers, which may be either deprecated, unavailable, or invalid in the Azure subscription you're using.
 }
 
 provider "fmc" {
