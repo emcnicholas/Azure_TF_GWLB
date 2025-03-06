@@ -17,6 +17,7 @@ terraform {
 
 provider "azurerm" {
   features {}
+  skip_provider_registration = true # Prevents registering varying resource providers, which may be either deprecated, unavailable, or invalid in the Azure subscription you're using.
 }
 
 provider "fmc" {
