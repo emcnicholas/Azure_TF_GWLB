@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "3.89.0"
+      version = "4.18.0"
     }
     fmc = {
       source = "CiscoDevNet/fmc"
@@ -16,6 +16,8 @@ terraform {
 }
 
 provider "azurerm" {
+  #resource_provider_registrations = "none"
+  subscription_id = "61b020af-0c48-4132-b2cf-2b162c4c42a2"
   features {}
 }
 

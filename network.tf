@@ -9,21 +9,21 @@ resource "azurerm_subnet" "fw_management" {
   name                 = "fw-management"
   resource_group_name  = azurerm_resource_group.gwlb.name
   virtual_network_name = azurerm_virtual_network.gwlb.name
-  address_prefixes     = [cidrsubnet(azurerm_virtual_network.gwlb.address_space[0], 8, 1)]
+  address_prefixes     = ["10.100.1.0/24"]
 }
 
 resource "azurerm_subnet" "fw_data" {
   name                 = "fw-data"
   resource_group_name  = azurerm_resource_group.gwlb.name
   virtual_network_name = azurerm_virtual_network.gwlb.name
-  address_prefixes     = [cidrsubnet(azurerm_virtual_network.gwlb.address_space[0], 8, 2)]
+  address_prefixes     = ["10.100.2.0/24"]
 }
 
 resource "azurerm_subnet" "fw_ccl" {
   name                 = "fw-ccl"
   resource_group_name  = azurerm_resource_group.gwlb.name
   virtual_network_name = azurerm_virtual_network.gwlb.name
-  address_prefixes     = [cidrsubnet(azurerm_virtual_network.gwlb.address_space[0], 8, 3)]
+  address_prefixes     = ["10.100.3.0/24"]
 }
 
 resource "azurerm_network_security_group" "fw" {
@@ -32,20 +32,32 @@ resource "azurerm_network_security_group" "fw" {
   resource_group_name = azurerm_resource_group.gwlb.name
 
   security_rule {
-    name                       = "All-Inbound"
-    priority                   = 1001
+    name                       = "Allow-HTTP-Inbound"
+    priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "*"
+    protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "*"
+    destination_port_range     = "80"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
   security_rule {
-    name                       = "All-Outbound"
-    priority                   = 1001
+    name                       = "Allow-HTTPS-Inbound"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-All-Outbound"
+    priority                   = 100
     direction                  = "Outbound"
     access                     = "Allow"
     protocol                   = "*"
@@ -136,7 +148,7 @@ resource "azurerm_subnet" "web" {
   name                 = "web-subnet"
   resource_group_name  = azurerm_resource_group.gwlb.name
   virtual_network_name = azurerm_virtual_network.web.name
-  address_prefixes     = [cidrsubnet(azurerm_virtual_network.web.address_space[0], 8, 1)]
+  address_prefixes     = ["10.1.1.0/24"]
 }
 
 resource "azurerm_subnet_network_security_group_association" "web" {
