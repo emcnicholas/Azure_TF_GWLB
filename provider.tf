@@ -2,15 +2,15 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "4.18.0"
+      version = "4.59.0"
     }
     fmc = {
       source = "CiscoDevNet/fmc"
-      version = ">=1.4.5"
+      version = "2.0.0"
     }
-    cdo = {
-      source = "CiscoDevNet/cdo"
-      version = ">=0.7.2, <1.0.0"
+    sccfm = {
+      source = "CiscoDevNet/sccfm"
+      version = "0.3.2"
     }
   }
 }
@@ -24,12 +24,12 @@ provider "azurerm" {
 
 provider "fmc" {
   is_cdfmc  = true
-  cdo_token = var.cdo_token
+  cdo_token = var.api_token
   fmc_host  = var.cdFMC
   cdfmc_domain_uuid = var.cdfmc_domain_uuid
 }
 
-provider "cdo" {
-  base_url  = var.cdo_base_url
-  api_token = var.cdo_token
+provider "sccfm" {
+  base_url  = var.base_url
+  api_token = var.api_token
 }

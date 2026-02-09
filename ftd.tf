@@ -66,7 +66,7 @@ resource "fmc_access_policies" "access_policy" {
   default_action = "block"
 }
 
-resource "cdo_ftd_device" "ftd" {
+resource "sccfm_ftd_device" "ftd" {
   access_policy_name = fmc_access_policies.access_policy.name
   licenses           = ["BASE","MALWARE","URLFilter","THREAT"]
   name               = "ftd-azure"
@@ -97,8 +97,8 @@ resource "azurerm_linux_virtual_machine" "ftd" {
       "FirewallMode": "Routed",
       "ManageLocally": "No",
       "FmcIp":"${var.cdFMC}",
-      "FmcRegKey":"${cdo_ftd_device.ftd.reg_key}",
-      "FmcNatId":"${cdo_ftd_device.ftd.nat_id}",
+      "FmcRegKey":"${sccfm_ftd_device.ftd.reg_key}",
+      "FmcNatId":"${sccfm_ftd_device.ftd.nat_id}",
       "Cluster": {
         "CclSubnetRange": "${cidrhost(azurerm_subnet.fw_ccl.address_prefixes[0],1)} ${cidrhost(azurerm_subnet.fw_ccl.address_prefixes[0],32)}",
         "ClusterGroupName": "ftd-azure",

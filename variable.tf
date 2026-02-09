@@ -18,13 +18,13 @@ variable "name" {
 }
 
 # CDO
-variable "cdo_token" {}
+variable "api_token" {}
 
 variable "cdFMC" {}
 
 variable "cdfmc_domain_uuid" {}
 
-variable "cdo_base_url" {}
+variable "base_url" {}
 
 variable "ftd_performance_tier" {
   default = "FTDv30"
